@@ -1,0 +1,54 @@
+const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+const signToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
+        expiresIn: '1d' 
+    });
+};
+
+exports.register = async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+
+        const newUser = await User.create({
+            name,
+            email,
+            password: hashedPassword
+        });
+
+        // NOTIFICATION: This will show in your terminal!
+        console.log(`🆕 NEW USER JOINED: ${newUser.name} (${newUser.email})`);
+
+        const token = signToken(newUser._id);
+
+        res.status(201).json({
+            status: 'success',
+            token,
+            data: { user: newUser }
+        });
+    } catch (err) {
+        res.status(400).json({ status: 'fail', message: err.message });
+    }
+};
+
+exports.login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        const user = await User.findOne({ email });
+
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({ message: 'Incorrect email or password' });
+        }
+
+        const token = signToken(user._id);
+        res.status(200).json({ status: 'success', token });
+
+    } catch (err) {
+        res.status(400).json({ status: 'fail', message: err.message });
+    }
+};

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevConnect | Developer Blog</title>
+    <link rel="stylesheet" href="/css/style.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">DevConnect</a>
+            <div class="nav-links" id="navLinks">
+                <a href="/login">Login</a>
+                <a href="/register" class="btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const navLinks = document.getElementById('navLinks');
+
+        if (token) {
+            navLinks.innerHTML = `
+                <a href="/dashboard">Dashboard</a>
+                <a href="/create-post">Create Post</a>
+                <a href="#" onclick="logout()" class="btn-primary">Logout</a>
+            `;
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+    </script>
+    <main class="container">

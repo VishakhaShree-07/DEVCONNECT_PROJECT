@@ -1,0 +1,83 @@
+<%- include('partials/header') %>
+
+<div class="dashboard-header">
+    <h1>Welcome to your Dashboard</h1>
+    <p>Discover what other developers are building.</p>
+</div>
+
+<div id="postsList" class="posts-grid">
+    <p>Loading posts...</p>
+</div>
+
+<script>
+    async function fetchPosts() {
+        
+        try {
+            const res = await fetch('/api/posts');
+            const data = await res.json();
+            
+            const postsList = document.getElementById('postsList');
+            postsList.innerHTML = ''; 
+
+            if (data.status === 'success') {
+                if (data.data.posts.length === 0) {
+                    postsList.innerHTML = '<p>No posts yet! Be the first to write one.</p>';
+                } else {
+                    let currentUserId = "";
+                    const token = localStorage.getItem('token');
+                    if(token) {
+                        const payload = JSON.parse(atob(token.split('.')[1]));
+                        currentUserId = payload.id;
+                    }
+
+                    data.data.posts.forEach(post => {
+                        const isOwner = post.author._id === currentUserId;
+
+                        const postCard = `
+                            <div class="post-card">
+                                <h3>${post.title}</h3>
+                                <p>${post.content.substring(0, 100)}...</p>
+                                <div class="post-meta">
+                                    <span>By: ${post.author.name}</span>
+                                </div>
+                                <div class="card-actions">
+                                    <a href="/post/${post._id}" class="read-more">Read More</a>
+                                    ${isOwner ? `<button onclick="deletePost('${post._id}')" class="btn-delete">Delete</button>` : ''}
+                                </div>
+                            </div>
+                        `;
+                        postsList.innerHTML += postCard;
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('Error fetching posts:', err);
+        }
+    }
+
+    async function deletePost(id) {
+        if (!confirm('Are you sure you want to delete this post?')) return;
+
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`/api/posts/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            const data = await res.json();
+            if (data.status === 'success') {
+                alert('Post deleted!');
+                location.reload(); 
+            } else {
+                alert(data.message);
+            }
+        } catch (err) {
+            alert('Something went wrong!');
+        }
+    }
+
+    fetchPosts();
+</script>
+
+<%- include('partials/footer') %>
