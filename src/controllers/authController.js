@@ -20,7 +20,6 @@ exports.register = async (req, res) => {
             password: hashedPassword
         });
 
-        // NOTIFICATION: This will show in your terminal!
         console.log(`🆕 NEW USER JOINED: ${newUser.name} (${newUser.email})`);
 
         const token = signToken(newUser._id);

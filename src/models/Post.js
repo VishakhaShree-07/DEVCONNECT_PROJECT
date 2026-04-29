@@ -1,4 +1,3 @@
-// src/models/Post.js
 const mongoose = require('mongoose');
 
 const postSchema = new mongoose.Schema({
@@ -12,7 +11,7 @@ const postSchema = new mongoose.Schema({
     },
     author: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // This creates a relationship! It tells Mongoose this ID belongs to a User.
+        ref: 'User',
         required: true
     },
     createdAt: {
